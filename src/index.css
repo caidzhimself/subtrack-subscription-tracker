@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Figtree", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "Figtree", sans-serif;
+  --color-pine: #14352d;
+  --color-pine-soft: #1f4d42;
+  --color-paper: #f6f7f4;
+  --color-saffron: #e8a33d;
+  --color-clay: #b4441f;
+}
+
+body { @apply bg-paper text-pine antialiased dark:bg-[#0e1a17] dark:text-[#e6ece9]; }
+:focus-visible { @apply outline-2 outline-offset-2 outline-saffron; }
