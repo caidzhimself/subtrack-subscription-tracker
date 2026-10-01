@@ -1,5 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useTheme } from '../hooks/useTheme'
+import { useAuth } from '../context/AuthContext'
+import { useInstallPrompt } from '../hooks/useInstallPrompt'
 
 const links = [
   { to: '/', label: 'Dashboard', icon: 'M3 12l9-9 9 9M5 10v10h14V10' },
@@ -12,6 +14,8 @@ const Icon = ({ d }) => (
 
 export default function Layout() {
   const { dark, toggle } = useTheme()
+  const { logout } = useAuth()
+  const { canInstall, install } = useInstallPrompt()
   const desk = ({ isActive }) =>
     `rounded-lg px-3 py-2 text-sm font-medium transition-colors ${isActive ? 'bg-white/15 text-white' : 'text-white/70 hover:text-white'}`
   const mob = ({ isActive }) =>
@@ -25,10 +29,16 @@ export default function Layout() {
           <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
             {links.map((l) => <NavLink key={l.to} to={l.to} end className={desk}>{l.label}</NavLink>)}
           </nav>
+          <div className="flex items-center gap-1">
+          {canInstall && (
+            <button onClick={install} className="rounded-lg bg-saffron px-3 py-2 text-sm font-semibold text-pine">Install app</button>
+          )}
+          <button onClick={logout} className="rounded-lg px-3 py-2 text-sm text-white/80 hover:bg-white/10">Sign out</button>
           <button onClick={toggle} aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
             className="rounded-lg p-2 text-white/80 hover:bg-white/10">
             <Icon d={dark ? 'M12 3v2m0 14v2M5 12H3m18 0h-2m-2.6-6.4l-1.4 1.4M7 17l-1.4 1.4m0-12.8L7 7m10 10l1.4 1.4M12 8a4 4 0 100 8 4 4 0 000-8z' : 'M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z'} />
           </button>
+          </div>
         </div>
       </header>
 

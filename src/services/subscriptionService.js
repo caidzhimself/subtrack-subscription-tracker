@@ -1,21 +1,23 @@
-// Placeholder data layer. Same async shape we'll use for Firestore,
-// so only this file changes when Firebase is added.
-const KEY = 'subtrack.subscriptions'
-const read = () => JSON.parse(localStorage.getItem(KEY) || '[]')
-const write = (list) => localStorage.setItem(KEY, JSON.stringify(list))
+import { addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query, updateDoc } from 'firebase/firestore'
+import { db } from '../lib/firebase'
 
-export async function getSubscriptions() {
-  await new Promise((r) => setTimeout(r, 400)) // simulate network so skeletons show
-  return read()
+// Each user's data lives at users/{uid}/subscriptions/{id}
+const col = (uid) => collection(db, 'users', uid, 'subscriptions')
+const ref = (uid, id) => doc(db, 'users', uid, 'subscriptions', id)
+
+// Real-time listener: onData fires now and again on every change. Returns unsubscribe.
+export const subscribe = (uid, onData, onError) =>
+  onSnapshot(
+    query(col(uid), orderBy('createdAt', 'desc')),
+    (snap) => onData(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+    onError
+  )
+
+export const addSubscription = (uid, data) => addDoc(col(uid), { ...data, createdAt: Date.now() })
+
+export const updateSubscription = (uid, id, data) => {
+  const { id: _id, ...rest } = data // never write the id into the document body
+  return updateDoc(ref(uid, id), rest)
 }
-export async function addSubscription(data) {
-  const item = { ...data, id: crypto.randomUUID(), createdAt: Date.now() }
-  write([item, ...read()])
-  return item
-}
-export async function updateSubscription(id, data) {
-  write(read().map((s) => (s.id === id ? { ...s, ...data } : s)))
-}
-export async function deleteSubscription(id) {
-  write(read().filter((s) => s.id !== id))
-}
+
+export const deleteSubscription = (uid, id) => deleteDoc(ref(uid, id))
